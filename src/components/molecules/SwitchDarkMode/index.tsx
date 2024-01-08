@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FormControlLabel, FormGroup, Switch, styled } from "@mui/material";
 
 import "./styles.scss";
 
 export default function SwitchDarkMode({ mode, checked, onChange }: any) {
+  const [hovered, setHovered] = useState(false);
+
   const MaterialUISwitch = styled(Switch)(() => ({
     width: 62,
     height: 34,
@@ -51,8 +53,37 @@ export default function SwitchDarkMode({ mode, checked, onChange }: any) {
     },
   }));
 
+  const handleMouseEnter = () => {
+    setHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setHovered(false);
+  };
+
+  useEffect(() => {
+    console.log("Hovered:", hovered);
+  }, [hovered]);
+
+  const switchLabel = getSwitchLabel();
+
+  function getSwitchLabel() {
+    const lightModeLabel = hovered
+      ? "Click to turn off the lights"
+      : "Light Mode Activated";
+    const darkModeLabel = hovered
+      ? "Click to Turn on the lights"
+      : "Night Mode Activated";
+
+    return mode === "dark" ? darkModeLabel : lightModeLabel;
+  }
+
   return (
-    <FormGroup className="switch-dark-mode">
+    <FormGroup
+      className="switch-dark-mode"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <FormControlLabel
         className={mode}
         control={
@@ -62,9 +93,7 @@ export default function SwitchDarkMode({ mode, checked, onChange }: any) {
             onChange={onChange}
           />
         }
-        label={
-          mode === "dark" ? "Night Mode Activated" : "Light Mode Activated"
-        }
+        label={switchLabel}
       />
     </FormGroup>
   );
