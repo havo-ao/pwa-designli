@@ -2,11 +2,11 @@ import { ThemeProvider } from "@mui/material/styles";
 
 import "./App.scss";
 import Home from "./components/pages/home";
-import useThemeMode from "./hooks/useThemeMode";
 import SwitchDarkMode from "./components/molecules/SwitchDarkMode";
+import { useCustomTheme } from "./hooks/useThemeContext";
 
 function App() {
-  const { theme, toggleMode } = useThemeMode();
+  const { theme, mode, toggleMode } = useCustomTheme();
 
   const handleToggleMode = () => {
     toggleMode();
@@ -16,8 +16,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <Home />
       <SwitchDarkMode
-        theme={theme}
-        checked={theme.palette.mode === "dark"}
+        mode={mode}
+        checked={mode === "dark"}
         onChange={handleToggleMode}
       />
     </ThemeProvider>
