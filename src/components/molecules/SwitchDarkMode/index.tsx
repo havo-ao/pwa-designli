@@ -3,7 +3,7 @@ import { FormControlLabel, FormGroup, Switch, styled } from "@mui/material";
 
 import "./styles.scss";
 
-export default function SwitchDarkMode({ theme, checked, onChange }: any) {
+export default function SwitchDarkMode({ mode, checked, onChange }: any) {
   const MaterialUISwitch = styled(Switch)(() => ({
     width: 62,
     height: 34,
@@ -22,13 +22,12 @@ export default function SwitchDarkMode({ theme, checked, onChange }: any) {
         },
         "& + .MuiSwitch-track": {
           opacity: 1,
-          backgroundColor:
-            theme.palette.mode === "dark" ? "#8796A5" : "#aab4be",
+          backgroundColor: mode === "dark" ? "#8796A5" : "#aab4be",
         },
       },
     },
     "& .MuiSwitch-thumb": {
-      backgroundColor: theme.palette.mode === "dark" ? "#003892" : "#001e3c",
+      backgroundColor: mode === "dark" ? "#003892" : "#001e3c",
       width: 32,
       height: 32,
       "&::before": {
@@ -47,7 +46,7 @@ export default function SwitchDarkMode({ theme, checked, onChange }: any) {
     },
     "& .MuiSwitch-track": {
       opacity: 1,
-      backgroundColor: theme.palette.mode === "dark" ? "#8796A5" : "#aab4be",
+      backgroundColor: mode === "dark" ? "#8796A5" : "#aab4be",
       borderRadius: 20 / 2,
     },
   }));
@@ -55,7 +54,7 @@ export default function SwitchDarkMode({ theme, checked, onChange }: any) {
   return (
     <FormGroup className="switch-dark-mode">
       <FormControlLabel
-        className={theme.palette.mode}
+        className={mode}
         control={
           <MaterialUISwitch
             sx={{ m: 1 }}
@@ -64,9 +63,7 @@ export default function SwitchDarkMode({ theme, checked, onChange }: any) {
           />
         }
         label={
-          theme.palette.mode === "dark"
-            ? "Night Mode Activated"
-            : "Light Mode Activated"
+          mode === "dark" ? "Night Mode Activated" : "Light Mode Activated"
         }
       />
     </FormGroup>
