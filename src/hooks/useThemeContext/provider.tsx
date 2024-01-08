@@ -28,12 +28,30 @@ const CustomThemeProvider: React.FC<CustomThemeProviderProps> = ({
     body.classList.toggle("dark-mode-bg", mode === "dark");
   }, [mode]);
 
+  useEffect(() => {
+    const systemTheme = detectSystemTheme();
+    setMode(systemTheme);
+  }, []);
+
   return (
     <CustomThemeContext.Provider value={contextValue}>
       {children}
     </CustomThemeContext.Provider>
   );
 };
+
+function detectSystemTheme() {
+  let theme: ModeTypes = "light";
+
+  if (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    theme = "dark";
+  }
+
+  return theme;
+}
 
 function createCustomTheme(mode: ModeTypes) {
   return createTheme({

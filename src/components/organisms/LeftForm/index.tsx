@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { SelectChangeEvent } from "@mui/material";
 
 import "./styles.scss";
@@ -6,33 +6,32 @@ import { ComponentContainer } from "../../molecules/ComponentContainer";
 import StockSelect from "../../molecules/InputSelect";
 import PriceTextField from "../../atoms/TextField";
 
-const LeftForm: React.FC = () => {
-  const [selectedStock, setSelectedStock] = React.useState("");
-  const [alertPrice, setAlertPrice] = React.useState("");
+type LeftFormProps = {
+  stocks: { value: string; name: string }[];
+  selectedStocks: string[];
+  handleStocksChange: (
+    event: SelectChangeEvent<string[]>,
+    child: ReactNode
+  ) => void;
+  alertPrice: string;
+  handleAlertPriceChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
 
-  const handleStockChange = (event: SelectChangeEvent<string>) => {
-    setSelectedStock(event.target.value);
-  };
-
-  const handleAlertPriceChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setAlertPrice(event.target.value);
-  };
-
-  const stocks = [
-    { value: "AAPL", name: "Apple Inc." },
-    { value: "GOOGL", name: "Google Inc." },
-  ];
-
+const LeftForm: React.FC<LeftFormProps> = ({
+  stocks,
+  selectedStocks,
+  handleStocksChange,
+  alertPrice,
+  handleAlertPriceChange,
+}) => {
   return (
     <ComponentContainer className="left-form">
       <StockSelect
         className="stock-select"
         label="Select Stock"
         options={stocks}
-        value={selectedStock}
-        onChange={handleStockChange}
+        value={selectedStocks}
+        onChange={handleStocksChange}
       />
       <PriceTextField
         fullWidth
