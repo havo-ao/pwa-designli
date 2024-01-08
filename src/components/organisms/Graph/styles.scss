@@ -1,0 +1,12 @@
+.graph {
+  padding: 20px;
+  font-family: "Open Sans", sans-serif;
+
+  &.dark {
+    color: #fff;
+  }
+
+  &.light {
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
