@@ -1,4 +1,6 @@
-import { useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React from "react";
+import { useEffect, useState } from "react";
 import { Grid, SelectChangeEvent } from "@mui/material";
 
 import { ComponentContainer } from "../../molecules/ComponentContainer";
@@ -7,32 +9,39 @@ import LeftForm from "../../organisms/LeftForm";
 import TopCards from "../../organisms/TopCards";
 import { useCustomTheme } from "../../../hooks/useThemeContext";
 import SwitchDarkMode from "../../molecules/SwitchDarkMode";
-import React from "react";
+import StockService from "../../../services/api.service";
+import WebSocketService from "../../../services/webSocket.service";
+import { stocks } from "../../../config/stocks.config";
+import {
+  StockData,
+  StockDataFetched,
+  StocksData,
+} from "../../../Types/global.types";
 
 const Home = () => {
-  const [selectedStocks, setSelectedStocks] = React.useState<string[]>([]);
-  const [alertPrice, setAlertPrice] = useState("");
+  const [stocksData, setStocksData] = useState<StocksData>([]);
+
+  const [selectedStockValues, setSelectedStockValues] = React.useState<
+    string[]
+  >([]);
+  const [alertPrice, setAlertPrice] = useState(0);
 
   const handleStocksChange = (event: SelectChangeEvent<string[]>): void => {
     if (Array.isArray(event.target.value)) {
-      setSelectedStocks(event.target.value);
+      setSelectedStockValues(event.target.value);
     } else if (typeof event.target.value === "string") {
-      setSelectedStocks([event.target.value]);
+      setSelectedStockValues([event.target.value]);
     } else {
-      setSelectedStocks([]);
+      setSelectedStockValues([]);
     }
   };
 
   const handleAlertPriceChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setAlertPrice(event.target.value);
+    const valueAsString = event.target.value;
+    setAlertPrice(parseFloat(valueAsString));
   };
-
-  const stocks = [
-    { value: "AAPL", name: "Apple Inc." },
-    { value: "GOOGL", name: "Google Inc." },
-  ];
 
   const { mode, toggleMode } = useCustomTheme();
 
@@ -40,23 +49,83 @@ const Home = () => {
     toggleMode();
   };
 
+  useEffect(() => {
+    StockService.fetchStocksData(stocks).then((data) => {
+      if (data) {
+        localStorage.clear();
+        setStocksData(data);
+        localStorage.setItem("stocksData", JSON.stringify(data));
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    WebSocketService.initializeWebSocket({
+      onMessage: (data) => {
+        if (data && data.length > 0) {
+          const storedStocksData = localStorage.getItem("stocksData");
+
+          if (storedStocksData) {
+            const parsedStoredStocksData: StockDataFetched[] =
+              JSON.parse(storedStocksData);
+
+            const updatedStocksData = parsedStoredStocksData.map((stock) => {
+              const matchingData = data.find(
+                (updatedStock: StockData) =>
+                  updatedStock.symbol === stock.symbol
+              );
+
+              if (matchingData) {
+                const previousClosePrice = stock.previousClosePrice;
+                const currentprice = matchingData.value;
+
+                const priceDifference = currentprice - previousClosePrice;
+
+                const percentageChange = parseFloat(
+                  ((priceDifference / previousClosePrice) * 100).toFixed(2)
+                );
+
+                return {
+                  ...stock,
+                  value: matchingData.value,
+                  change: percentageChange || 0,
+                };
+              }
+
+              return stock;
+            });
+
+            setStocksData(updatedStocksData);
+            localStorage.setItem(
+              "stocksData",
+              JSON.stringify(updatedStocksData)
+            );
+          }
+        }
+      },
+    });
+  }, []);
+
   return (
     <ComponentContainer className="home">
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <TopCards />
+          <TopCards stocksData={stocksData} />
         </Grid>
         <Grid item xs={12} md={4}>
           <LeftForm
             stocks={stocks}
-            selectedStocks={selectedStocks}
+            selectedStockValues={selectedStockValues}
             handleStocksChange={handleStocksChange}
             alertPrice={alertPrice}
             handleAlertPriceChange={handleAlertPriceChange}
           />
         </Grid>
         <Grid item xs={12} md={8}>
-          <Graph />
+          <Graph
+            selectedStockValues={selectedStockValues}
+            stocksData={stocksData}
+          />
         </Grid>
       </Grid>
       <SwitchDarkMode
