@@ -1,9 +1,25 @@
 .top-cards {
   padding: 20px;
   display: flex;
+  overflow: scroll;
+  width: calc(100% - 60px);
+
+  .top-cards-container {
+    display: flex;
+  }
 
   .stock-card {
     min-width: 300px;
     width: 10%;
+    margin-right: 20px;
+    border-radius: 10px;
+  }
+
+  .below {
+    color: #f45b5b;
+  }
+
+  .above {
+    color: #1db954;
   }
 }
