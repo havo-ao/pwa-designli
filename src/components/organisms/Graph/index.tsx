@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 import {
   Bar,
   BarChart,
@@ -10,16 +12,18 @@ import {
 import { ComponentContainer } from "../../molecules/ComponentContainer";
 import { SelectedStockValues, StocksData } from "../../../Types/global.types";
 import { useCustomTheme } from "../../../hooks/useThemeContext";
-import { useEffect, useRef, useState } from "react";
+import "./styles.scss";
 
 interface GraphParams {
   selectedStockValues: SelectedStockValues;
   stocksData: StocksData;
+  alertPrice: number;
 }
 
 const Graph: React.FC<GraphParams> = ({
   selectedStockValues,
   stocksData,
+  alertPrice,
 }: GraphParams) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState<number>(800);
@@ -38,16 +42,19 @@ const Graph: React.FC<GraphParams> = ({
 
   const themeModeClass = mode;
 
-  const dollarValue = 150;
+  const dollarValue = alertPrice;
 
   useEffect(() => {
     const handleResize = () => {
       if (chartContainerRef.current) {
+        const numberOfValuesSelected = selectedStockValues.length;
         const { width, height } =
           chartContainerRef.current.getBoundingClientRect();
         let widthToResize = 0;
-        if (selectedStockValues.length < 8) {
-          widthToResize = width * (1 / 8) * selectedStockValues.length;
+        if (numberOfValuesSelected === 0) {
+          widthToResize = width;
+        } else if (numberOfValuesSelected < 8) {
+          widthToResize = width * (1 / 8) * numberOfValuesSelected;
         } else {
           widthToResize = width;
         }
@@ -62,7 +69,15 @@ const Graph: React.FC<GraphParams> = ({
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [selectedStockValues]);
+  }, [selectedStockValues.length]);
+
+  if (selectedStockValues.length === 0) {
+    return (
+      <div className={`empty-chart ${themeModeClass}`}>
+        Select at least one Stock to add to chart
+      </div>
+    );
+  }
 
   return (
     <ComponentContainer className={`graph ${themeModeClass}`}>
@@ -74,19 +89,28 @@ const Graph: React.FC<GraphParams> = ({
           height: "100%",
         }}
       >
-        <BarChart
-          width={chartWidth}
-          height={chartHeight}
-          className="chart"
-          data={stockChartData}
-        >
-          <CartesianGrid stroke="#ccc" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <ReferenceLine y={dollarValue} stroke="red" strokeDasharray="3 3" />
-          <Bar dataKey="value" fill="#8884d8" />
-        </BarChart>
+        <>
+          {console.log(
+            "Chart: ",
+            chartHeight,
+            chartWidth,
+            selectedStockValues,
+            stocksData
+          )}
+          <BarChart
+            width={chartWidth}
+            height={chartHeight}
+            className="chart"
+            data={stockChartData}
+          >
+            <CartesianGrid stroke="#ccc" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <ReferenceLine y={dollarValue} stroke="red" strokeDasharray="3 3" />
+            <Bar dataKey="value" fill="#8884d8" />
+          </BarChart>
+        </>
       </div>
     </ComponentContainer>
   );

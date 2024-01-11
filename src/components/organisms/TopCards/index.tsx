@@ -24,8 +24,8 @@ const TopCards: React.FC<TopCardParams> = ({ stocksData }: TopCardParams) => {
                 className={stock.change < 0 ? `below` : `above`}
                 variant="body1"
               >
-                {`Change:${
-                  stock.change > 0 ? `+${stock.change}%` : `-${stock.change}%`
+                {`Change: ${
+                  stock.change > 0 ? `+${stock.change}%` : `${stock.change}%`
                 }`}
               </Typography>
             </CardContent>
