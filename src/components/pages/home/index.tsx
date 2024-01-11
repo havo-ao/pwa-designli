@@ -62,7 +62,6 @@ const Home = () => {
       onMessage: (data) => {
         if (data && data.length > 0) {
           const storedStocksData = localStorage.getItem("stocksData");
-          const storedAlertPrice = localStorage.getItem("alertPrice") || "";
 
           if (storedStocksData) {
             const parsedStoredStocksData: StockDataFetched[] =
@@ -74,26 +73,8 @@ const Home = () => {
                   updatedStock.symbol === stock.symbol
               );
 
-              const parsedStoredAlertPrice = parseInt(storedAlertPrice);
-
-              if (matchingData && parsedStoredAlertPrice === 0) {
+              if (matchingData) {
                 const previousClosePrice = stock.previousClosePrice;
-                const currentPrice = matchingData?.value;
-
-                const priceDifference = currentPrice - previousClosePrice;
-
-                const percentageChange = parseFloat(
-                  ((priceDifference / previousClosePrice) * 100).toFixed(2)
-                );
-                console.log("No alert price", alertPrice);
-                return {
-                  ...stock,
-                  value: currentPrice,
-                  change: percentageChange || 0,
-                };
-              } else if (alertPrice > 0) {
-                console.log("Alert price");
-                const previousClosePrice = alertPrice;
                 const currentPrice = matchingData?.value;
 
                 const priceDifference = currentPrice - previousClosePrice;
