@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
 import { useEffect, useState } from "react";
-import { Grid, SelectChangeEvent } from "@mui/material";
+import { Grid } from "@mui/material";
 
 import { ComponentContainer } from "../../molecules/ComponentContainer";
 import Graph from "../../organisms/Graph";
@@ -26,11 +26,9 @@ const Home = () => {
   >([]);
   const [alertPrice, setAlertPrice] = useState(0);
 
-  const handleStocksChange = (event: SelectChangeEvent<string[]>): void => {
-    if (Array.isArray(event.target.value)) {
+  const handleStocksChange = (event: any): void => {
+    if (event.target.value) {
       setSelectedStockValues(event.target.value);
-    } else if (typeof event.target.value === "string") {
-      setSelectedStockValues([event.target.value]);
     } else {
       setSelectedStockValues([]);
     }
@@ -64,6 +62,7 @@ const Home = () => {
       onMessage: (data) => {
         if (data && data.length > 0) {
           const storedStocksData = localStorage.getItem("stocksData");
+          const storedAlertPrice = localStorage.getItem("alertPrice") || "";
 
           if (storedStocksData) {
             const parsedStoredStocksData: StockDataFetched[] =
@@ -75,19 +74,36 @@ const Home = () => {
                   updatedStock.symbol === stock.symbol
               );
 
-              if (matchingData) {
-                const previousClosePrice = stock.previousClosePrice;
-                const currentprice = matchingData.value;
+              const parsedStoredAlertPrice = parseInt(storedAlertPrice);
 
-                const priceDifference = currentprice - previousClosePrice;
+              if (matchingData && parsedStoredAlertPrice === 0) {
+                const previousClosePrice = stock.previousClosePrice;
+                const currentPrice = matchingData?.value;
+
+                const priceDifference = currentPrice - previousClosePrice;
 
                 const percentageChange = parseFloat(
                   ((priceDifference / previousClosePrice) * 100).toFixed(2)
                 );
-
+                console.log("No alert price", alertPrice);
                 return {
                   ...stock,
-                  value: matchingData.value,
+                  value: currentPrice,
+                  change: percentageChange || 0,
+                };
+              } else if (alertPrice > 0) {
+                console.log("Alert price");
+                const previousClosePrice = alertPrice;
+                const currentPrice = matchingData?.value;
+
+                const priceDifference = currentPrice - previousClosePrice;
+
+                const percentageChange = parseFloat(
+                  ((priceDifference / previousClosePrice) * 100).toFixed(2)
+                );
+                return {
+                  ...stock,
+                  value: currentPrice,
                   change: percentageChange || 0,
                 };
               }
@@ -125,6 +141,7 @@ const Home = () => {
           <Graph
             selectedStockValues={selectedStockValues}
             stocksData={stocksData}
+            alertPrice={alertPrice}
           />
         </Grid>
       </Grid>
